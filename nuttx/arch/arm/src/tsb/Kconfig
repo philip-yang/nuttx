@@ -211,7 +211,7 @@ config ARCH_CHIP_DEVICE_I2S
 config ARCH_CHIP_DEVICE_SPI
 	bool "SPI Master Support"
 	select DEVICE_CORE
-	default n
+	default y
 	---help---
 		TSB SPI Master Driver
 
