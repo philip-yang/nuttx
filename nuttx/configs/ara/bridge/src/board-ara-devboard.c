@@ -57,6 +57,41 @@
 #define SD_CARD_DETECT_PIN 22 /* GPIO 22 */
 #endif
 
+#ifdef CONFIG_ARCH_CHIP_DEVICE_SPI
+#include <nuttx/device_spi_board.h>
+
+#define SPI_CS0_GPIO    15          /* SPIM_CS0_N */
+#define SPI_CS1_GPIO    6           /* SPIM_CS1_N */
+#define SPI_MAX_CHIPS   2           /* Maximum CS supported  */
+#define SPI_MAX_FREQ    24000000    /* Maximum FREQ supported */
+#define SPI_MIN_FREQ    15000       /* MINimum FREQ supported */
+#define SPI_MAX_DIV     0xFFFE      /* Maximum DIVIDER supported */
+#define SPI_BPW_MASK    0xFFFFFFF8  /* Bit Pre-word supported */
+#define SPI_TX_DEPTH    16          /* TX FIFO depth supported*/
+#define SPI_RX_DEPTH    16          /* RX FIFO depth supported*/
+
+struct spi_board_device_cfg spi_slave_devices[SPI_MAX_CHIPS] =
+{
+    /* SPI FLASH: W25Q16DW */
+    {"spidev", SPI_MAX_FREQ, SPI_DEV_TYPE, SPI_MODE_0, 8, SPI_CS0_GPIO, 1},
+    /* Unknown SPI device (for testing) */
+    {"spidev", SPI_MAX_FREQ, SPI_DEV_TYPE, SPI_MODE_0, 8, SPI_CS1_GPIO, 1},
+};
+
+struct spi_board_init_data spi_board_devinfo =
+{
+    .num = SPI_MAX_CHIPS,
+    .devices = spi_slave_devices,
+    .using_gpio = TRUE,
+    .max_freq = SPI_MAX_FREQ,
+    .min_freq = SPI_MIN_FREQ,
+    .max_div = SPI_MAX_DIV,
+    .bpw_mask = SPI_BPW_MASK,
+    .tx_depth = SPI_TX_DEPTH,
+    .rx_depth = SPI_RX_DEPTH,
+};
+#endif
+
 #ifdef CONFIG_APBRIDGEA
 /* must pull up or drive high on SDB APBridgeA to bring Helium out of reset */
 #define HELIUM_EXT_NRST_BTN_GPIO 0
@@ -131,6 +166,15 @@ static struct device devices[] = {
         .resource_count = ARRAY_SIZE(sdio_board_resources),
     },
 #endif
+#ifdef CONFIG_ARCH_CHIP_DEVICE_SPI
+    {
+        .type           = DEVICE_TYPE_SPI_BOARD_HW,
+        .name           = "spi_board",
+        .desc           = "SPI Board Device Driver",
+        .id             = 0,
+        .init_data      = &spi_board_devinfo,
+    },
+#endif
 };
 
 static struct device_table bdb_device_table = {
@@ -163,6 +207,10 @@ static void bdb_driver_register(void)
 #ifdef CONFIG_ARCH_CHIP_DEVICE_SDIO
     extern struct device_driver sdio_board_driver;
     device_register_driver(&sdio_board_driver);
+#endif
+#ifdef CONFIG_ARCH_CHIP_DEVICE_SPI
+    extern struct device_driver spi_board_driver;
+    device_register_driver(&spi_board_driver);
 #endif
 
 }

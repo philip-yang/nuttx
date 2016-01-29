@@ -80,6 +80,10 @@ ifeq ($(CONFIG_ARCH_CHIP_DEVICE_SDIO),y)
 CSRCS += sdio_board.c
 endif
 
+ifeq ($(CONFIG_ARCH_CHIP_DEVICE_SPI),y)
+CSRCS += spi_board.c
+endif
+
 ifeq ($(CONFIG_ARA_BRIDGE_BOARD_OOT),y)
 CSRCS += $(OOT_BOARD)
 endif
